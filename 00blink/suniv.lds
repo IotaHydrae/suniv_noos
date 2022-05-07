@@ -1,31 +1,20 @@
-// Copyright (c) 2022 IotaHydrae
-// 
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
 SECTIONS {
-    . = 0x80100000l
+    . = 0x80100000;
 
     . = ALIGN(4);
-    .text : {
-        *(.text)
+    .text      :
+    {
+      *(.text)
     }
 
     . = ALIGN(4);
-    .rodata : {
-        *(.rodata)
-    }
+    .rodata : { *(.rodata) }
 
     . = ALIGN(4);
-    .data : {
-        *(.data)
-    }
+    .data : { *(.data) }
 
     . = ALIGN(4);
     __bss_start = .;
-    .bss : {
-        *(.bss)
-        *(.COMMON)
-    }
-    _bss_end  = .;
+    .bss : { *(.bss) *(.COMMON) }
+    __bss_end = .;
 }
