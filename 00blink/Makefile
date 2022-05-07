@@ -3,19 +3,49 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-PREFIX=arm-linux-gnueabi-
+PREFIX=arm-none-eabi-
 CC=$(PREFIX)gcc
 LD=$(PREFIX)ld
 AR=$(PREFIX)ar
 OBJCOPY=$(PREFIX)objcopy
 OBJDUMP=$(PREFIX)objdump
 
-led.img : head.S
-	$(CC) -nostdlib -g -c -o head.o head.S
+objs:=head.o
 
-	$(LD) -T suniv.lds -g head.o -o led.elf
+LOAD_ADDR:=0x80000000
+LINK_ADDR:=0x80000000
+
+LINK_SCRIPT:=suniv-f1c200s.lds
+
+led.img: clean $(objs)
+	$(LD) -T $(LINK_SCRIPT) -g $(objs) -o led.elf
 
 	$(OBJCOPY) -O binary -S led.elf led.bin
 	$(OBJDUMP) -D -m arm led.elf > led.dis
 
-	mkimage -C none -A arm -T sunxi_egon -a 0x80100000 -e 0x80100000 -d led.bin led.img
+	mkimage -A arm -T sunxi_egon -e $(LINK_ADDR) -d led.bin $@
+
+%.o:%.S
+	$(CC) -nostdlib -g -c -o $@ $<
+%.o:%.c
+	$(CC) -nostdlib -g -c -o $@ $<
+
+.PHONY:clean
+
+clean:
+	rm -rf *.img *.dis *.elf *.o *.bin
+
+.PHONY:write
+
+write:led.img
+	sudo sunxi-fel -p write $(LOAD_ADDR) led.img
+
+.PHONY:exec
+
+exec:write
+	sudo sunxi-fel exec $(LOAD_ADDR)
+
+.PHONY:ver
+
+ver:
+	sudo sunxi-fel ver
