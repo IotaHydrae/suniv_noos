@@ -10,10 +10,10 @@ AR=$(PREFIX)ar
 OBJCOPY=$(PREFIX)objcopy
 OBJDUMP=$(PREFIX)objdump
 
-led.img : head.S blink.c
-	$(CC) -nostdlib -g -c - o head.o head.S
+led.img : head.S
+	$(CC) -nostdlib -g -c -o head.o head.S
 
-	$(LD) -T suniv-f1c200s.lds -g head.o -o led.elf
+	$(LD) -T suniv.lds -g head.o -o led.elf
 
 	$(OBJCOPY) -O binary -S led.elf led.bin
 	$(OBJDUMP) -D -m arm led.elf > led.dis
