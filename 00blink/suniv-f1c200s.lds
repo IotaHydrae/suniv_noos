@@ -9,15 +9,15 @@ SECTIONS {
 	{
 		__start = .;
 		*(.text)
-	} > .sdram
+	} > .sram
 
 	. = ALIGN(4);
-	.rodata : { *(.rodata) } > .sdram
+	.rodata : { *(.rodata) } > .sram
 
 	. = ALIGN(4);
 	.data : { 
 		*(.data)
-	 } > .sdram
+	 } > .sram
 
 	. = ALIGN(4);
 	.bss :
