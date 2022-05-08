@@ -13,5 +13,16 @@
 .global _start
 
 _start:
-	ldr sp, =(0x00000000 + 0x8000)	@ top of sram
-	bl main
+	/* init clk */
+
+	/* init ddr */
+
+relocate:
+	/* copy .text .rodata .data to link addr */
+
+	/* clear .bss */
+
+	/* run a blink at ddr */
+
+loop:
+	b loop
