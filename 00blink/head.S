@@ -17,25 +17,25 @@ _start:
 loop:
 	ldr r0, =(0x01c20800 + 0x10)	@ PA Data Register address
 	ldr r1, [r0]
-	orr r1, r1, #0x00000008
-	str r1, [r0]			@ set PA3 to high
+	and r1, r1, #0x00000000
+	str r1, [r0]			@ set PA3 to low
 
-	mov r0, #0x1000000
+	mov r2, #0x100000
 	bl delay
 
 	ldr r0, =(0x01c20800 + 0x10)	@ PA Data Register address
 	ldr r1, [r0]
-	orr r1, r1, #0x00000000
+	orr r1, r1, #0x00000008
 	str r1, [r0]			@ set PA3 to high
 
-	mov r0, #0x1000000
+	mov r2, #0x100000
 	bl delay
 
 	b loop
 
 
 delay:
-	sub r0, r0, #1
-	cmp r0, #0
+	sub r2, r2, #1
+	cmp r2, #0
 	bne delay
 	mov pc, lr
