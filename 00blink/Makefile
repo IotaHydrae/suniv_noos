@@ -5,8 +5,8 @@
 #
 # Hi, guys
 # 
-# If you want to run program from spi flash or sd,
-# you need to burn led.img to flash or sd on pos 0 like:
+# If you want to run this program from spi flash or sd,
+# you need to burn led.img to flash or sd like:
 # `sudo sunxi-fel -p spi-flash write 0 led.img`
 #
 # The `led.img` is just led.bin but add a "sunxi eGon" head,
@@ -35,29 +35,31 @@
 # Cheers, Iota
 
 
-PREFIX=arm-none-eabi-
-CC=$(PREFIX)gcc
-LD=$(PREFIX)ld
-AR=$(PREFIX)ar
-OBJCOPY=$(PREFIX)objcopy
-OBJDUMP=$(PREFIX)objdump
-
-objs:=head.o
+PREFIX?=arm-none-eabi-
+CC:=$(PREFIX)gcc
+LD:=$(PREFIX)ld
+AR:=$(PREFIX)ar
+OBJCOPY:=$(PREFIX)objcopy
+OBJDUMP:=$(PREFIX)objdump
 
 LOAD_ADDR:=0x00000000
 LINK_ADDR:=0x80000000
 
 LINK_SCRIPT:=suniv-f1c200s.lds
-LINK_SCRIPT:=suniv.lds
+#LINK_SCRIPT:=suniv.lds
 
+objs:=head.o
 
-led.img: clean $(objs)
+default:led.bin
+
+led.bin: clean $(objs)
 	$(LD) -T $(LINK_SCRIPT) -g $(objs) -o led.elf
 
 	$(OBJCOPY) -O binary -S led.elf led.bin
 	$(OBJDUMP) -D -m arm led.elf > led.dis
 
-	mkimage -C none -A arm -T sunxi_egon -d led.bin $@
+led.img: led.bin
+	mkimage -C none -A arm -T sunxi_egon -e $(LINK_ADDR) -d led.bin $@
 
 %.o:%.S
 	$(CC) -nostdlib -g -c -o $@ $<
@@ -65,14 +67,16 @@ led.img: clean $(objs)
 	$(CC) -nostdlib -g -c -o $@ $<
 
 .PHONY:clean
-
 clean:
 	rm -rf *.img *.dis *.elf *.o *.bin
 
 .PHONY:write
-
 write:led.bin
 	sudo sunxi-fel -p write $(LOAD_ADDR) $<
+
+.PHONY:write-flash
+write-flash:led.img
+	sudo sunxi-fel -p spiflash-write 0 $
 
 .PHONY:exec
 
