@@ -50,7 +50,7 @@ LINK_ADDR:=0x80000000
 LINK_SCRIPT:=suniv-f1c200s.lds
 #LINK_SCRIPT:=suniv.lds
 
-objs:=head.o main.o
+objs:=head.o dram_suniv.o clock_suniv.o
 
 default:led.bin
 

@@ -14,15 +14,27 @@
 
 _start:
 	/* init clk */
+	bl dram_init
 
 	/* init ddr */
+	bl clock_init
 
 relocate:
 	/* copy .text .rodata .data to link addr */
+	bl memcpy
 
 	/* clear .bss */
+	bl memset
 
 	/* run a blink at ddr */
+	b loop
+
+memcpy:
+	mov pc, lr
+
+memset:
+	mov pc, lr
+
 
 loop:
 	b loop
