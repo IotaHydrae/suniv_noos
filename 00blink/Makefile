@@ -2,6 +2,38 @@
 # 
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
+#
+# Hi, guys
+# 
+# If you want to run program from spi flash or sd,
+# you need to burn led.img to flash or sd on pos 0 like:
+# `sudo sunxi-fel -p spi-flash write 0 led.img`
+#
+# The `led.img` is just led.bin but add a "sunxi eGon" head,
+# and is checked by bootrom.
+#
+# If you want to run program to sram, just 
+# download the led.bin to 0x00000000
+#
+# PS:
+# I don't know why the address of sram coincides with bootrom, 
+# according to the manual, the address of SRAM A should be 0x00010000.
+#
+# My guess is this:
+# The overlapped sram at 0x00000000, It's just looks overlapped. 
+#
+# In fact, It's like this. When the cpu is powered on to 
+# execute the bootrom, if no executable firmware is detected
+# from the spi and sdio, the SoC will enter the FEL mode, 
+# so the bootrom has no effect. Now, the memory controller switches 
+# the first address of SRAM A to 0x00000000. When we write the bin 
+# file to the address of 0x00000000, it is actually written to SRAM A.
+#
+# Of course, there is another possibility, there is indeed another sram, 
+# which replaces the location of the bootrom, but we don't know it.
+#
+# Cheers, Iota
+
 
 PREFIX=arm-none-eabi-
 CC=$(PREFIX)gcc
@@ -12,10 +44,12 @@ OBJDUMP=$(PREFIX)objdump
 
 objs:=head.o
 
-LOAD_ADDR:=0x80000000
+LOAD_ADDR:=0x00000000
 LINK_ADDR:=0x80000000
 
 LINK_SCRIPT:=suniv-f1c200s.lds
+LINK_SCRIPT:=suniv.lds
+
 
 led.img: clean $(objs)
 	$(LD) -T $(LINK_SCRIPT) -g $(objs) -o led.elf
@@ -23,7 +57,7 @@ led.img: clean $(objs)
 	$(OBJCOPY) -O binary -S led.elf led.bin
 	$(OBJDUMP) -D -m arm led.elf > led.dis
 
-	mkimage -A arm -T sunxi_egon -e $(LINK_ADDR) -d led.bin $@
+	mkimage -C none -A arm -T sunxi_egon -d led.bin $@
 
 %.o:%.S
 	$(CC) -nostdlib -g -c -o $@ $<
@@ -37,8 +71,8 @@ clean:
 
 .PHONY:write
 
-write:led.img
-	sudo sunxi-fel -p write $(LOAD_ADDR) led.img
+write:led.bin
+	sudo sunxi-fel -p write $(LOAD_ADDR) $<
 
 .PHONY:exec
 

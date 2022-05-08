@@ -20,7 +20,7 @@ loop:
 	orr r1, r1, #0x00000008
 	str r1, [r0]			@ set PA3 to high
 
-	mov r0, #0x10000
+	mov r0, #0x1000000
 	bl delay
 
 	ldr r0, =(0x01c20800 + 0x10)	@ PA Data Register address
@@ -28,7 +28,7 @@ loop:
 	orr r1, r1, #0x00000000
 	str r1, [r0]			@ set PA3 to high
 
-	mov r0, #0x10000
+	mov r0, #0x1000000
 	bl delay
 
 	b loop
