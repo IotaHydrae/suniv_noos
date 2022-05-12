@@ -17,19 +17,20 @@ int main(int argc, char **argv)
 	*rp &= ~(7 << 12);
 	*rp |= (1 << 12);
 
+	/* load PA Data register's content */
 	rp = (volatile unsigned int *)(PIO_BASE + PA_DATA);
 
 	while(1){
 		/* set PA3 to low */
 		*rp &= ~(1 << 3);
 
-		/* delay */
+		/* make a delay */
 		delay(0x0000f000);
 
 		/* set PA3 to high */
 		*rp |= (1 << 3);
 
-		/* delay */
+		/* make a delay */
 		delay(0x0000f000);
 	}
 
