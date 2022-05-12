@@ -7,6 +7,8 @@
 
 
 dram_init:
+	/* Init sdram pad drive */
 	ldr r0, =(PIO_BASE + SDRAM_PAD_MULTI_DRIVING)
 
+	/* Init sdram pad pull */
 	ldr r0, =(PIO_BASE + SDRAM_PAD_PULL)

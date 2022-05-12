@@ -10,6 +10,7 @@
 
 /* do set, enable, validate */
 clock_init:
+	/* Init cpu main clock */
 	ldr r0, =(CCU_BASE + PLL_CPU_CTRL_REG)
 	ldr r1, [r0]
 
