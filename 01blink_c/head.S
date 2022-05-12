@@ -13,5 +13,5 @@
 .global _start
 
 _start:
-	ldr sp, =(0x00000000 + 0x8000)	@ top of sram
+	ldr sp, =(0x00000000 + 0x8000)	@ top of sram, about 32KB
 	bl main
