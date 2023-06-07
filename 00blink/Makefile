@@ -15,29 +15,14 @@
 # The `led.img` is just led.bin but add a "sunxi eGon" head,
 # and it's checked by bootrom.
 #
-# If you want to run program from sram,
+# If you want to run program from sdram,
 # just download the led.bin to 0x00000000
+# Actually, there may have a offset, should be 0x80000000
+#
 # `sudo sunxi-fel write 0x0 led.bin && sudo sunxi-fel exec 0x0`,
 # or just `make exec`
 #
-# PS:
-# I don't know why the address of sram coincides with bootrom,
-# according to the manual, the address of SRAM A should be 0x00010000.
-#
-# My guess is this:
-# The overlapped sram at 0x00000000, It's just looks overlapped.
-#
-# In fact, It's like this. When the cpu is powered on to
-# execute the bootrom, if no executable firmware is detected
-# from the spi and sdio, the SoC will enter the FEL mode,
-# so the bootrom has no effect. Now, the memory controller switches
-# the first address of SRAM A to 0x00000000. When we write the bin
-# file to the address of 0x00000000, it is actually written to SRAM A.
-#
-# Of course, there is another possibility, there is indeed another sram,
-# which replaces the location of the bootrom, but we don't know it.
-#
-# Cheers, Iota
+# Cheers, iotah
 
 
 PREFIX?=arm-none-eabi-

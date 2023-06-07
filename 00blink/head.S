@@ -21,25 +21,31 @@ _start:
 
 	ldr r0, =(0x01c20800 + 0x10)	@ Address of PA Data Register
 	ldr r1, [r0]
+
 loop:
-	and r1, r1, #0x00000000		@ In output mode, set bit means output the value of bit
-	str r1, [r0]			@ set PA3 to low
-
-	mov r2, #0x0000f000		@ mov should fix the op1 to 8 bit.
-	bl delay
-
-	orr r1, r1, #0x00000008
-	str r1, [r0]			@ set PA3 to high
-
-	mov r2, #0x0000f000
-	bl delay
-
+    ldr sp, =(0x80000000 + 0x100000)
+    bl blink
 	b loop
 
+blink:
+    push {lr}   @ we got another function call, save lr first
+    and r1, r1, #0x00000000     @ In output mode, set bit means output the value of bit
+    str r1, [r0]            @ set PA3 to low
+
+    mov r2, #0x000f0000     @ mov should fix the op1 to 8 bit.
+    bl delay
+
+    orr r1, r1, #0x00000008
+    str r1, [r0]            @ set PA3 to high
+
+    mov r2, #0x0000f000
+    bl delay
+    pop {lr}
+
+    bx lr
 
 delay:
 	sub r2, r2, #1			@ do simple sub command
 	cmp r2, #0			@ if r0 - 0 == 0,  set cpsr Z=1, else set Z=0
 	bne delay			@ means if cpsr Z == 0, jump to delay
-	mov pc, lr
-
+    mov pc, lr
