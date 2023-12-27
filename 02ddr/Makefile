@@ -52,9 +52,8 @@ LOAD_ADDR:=0x00000000
 LINK_ADDR:=0x80000000
 
 LINK_SCRIPT:=suniv-f1c200s.lds
-#LINK_SCRIPT:=suniv.lds
 
-TARGET:=ccu
+TARGET:=ddr
 
 objs:=head.o
 
@@ -71,9 +70,9 @@ $(TARGET).img: $(TARGET).bin
 	mkimage -C none -A arm -T sunxi_egon -e $(LINK_ADDR) -d $(TARGET).bin $@
 
 %.o:%.S
-	$(CC) -nostdlib -g -c -o $@ $<
+	$(CC) -nostdlib -c -o $@ $<
 %.o:%.c
-	$(CC) -nostdlib -g -c -o $@ $<
+	$(CC) -nostdlib -c -o $@ $<
 
 .PHONY:clean
 clean:
