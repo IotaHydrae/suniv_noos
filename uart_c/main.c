@@ -48,6 +48,7 @@ int main(int argc, char **argv)
     char str[] = "Hello, world!\r\n";
 
     clk_init();
+    uart_init();
 
     /* uart function test */
     uart_putc('A');
