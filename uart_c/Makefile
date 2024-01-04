@@ -56,7 +56,7 @@ LINK_SCRIPT:=suniv-f1c200s.lds
 
 TARGET:=uart
 
-objs:=head.o main.o uart.o
+objs:=head.o main.o uart.o string.o
 
 default:$(TARGET).bin
 

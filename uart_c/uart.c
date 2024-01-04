@@ -58,9 +58,9 @@ void uart_putc(char c)
     writel(c, UART0_BASE + 0x00);
 }
 
-void uart_puts(char *str)
+void uart_puts(const char *str)
 {
-    char *p = str;
+    const char *p = str;
     while (*p != '\0')
         uart_putc(*p++);
 }

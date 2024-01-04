@@ -7,6 +7,6 @@ typedef unsigned int u32;
 
 void uart_init(void);
 void uart_putc(char c);
-void uart_puts(char *str);
+void uart_puts(const char *str);
 
 #endif
