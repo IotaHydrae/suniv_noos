@@ -1,0 +1,39 @@
+#include "string.h"
+// @ w4 0x01C20824,0x00007222
+// @ w4 0x01C20AC0,0x00000AAA
+// @ w4 0x01C20020,0x90100C00
+// @ w4 0x01C20060,0x01004000
+// @ w4 0x01C202C0,0x01000000
+// @ w4 0x01C202C0,0x01004000
+// @ w4 0x01C20AC4,0x00010501
+// @ w4 0x01c01004,0xB7CEEDC2
+// @ w4 0x01c01008,0x00A70008
+// @ w4 0x01C01000,0x0001318A
+// @ w4 0x01C0100C,0x000800c8
+// @ w4 0x01C0100C,0x000800c9
+// @ w4 0x01C01024,0x00161600
+// @ w4 0x01C01010,0x000004C0
+
+// @ w4 0x80000000,0xAABBCCDD
+// @ mem32 0x80000000, 1
+
+#define readl(a) (*(volatile unsigned int *)(a))
+#define writel(v,a) (*(volatile unsigned int *)(a) = (v))
+
+void ddr_init(void)
+{
+    writel(0x00007222,0x01C20824);
+    writel(0x00000AAA,0x01C20AC0);
+    writel(0x90100C00,0x01C20020);  
+    writel(0x01004000,0x01C20060);  /* enable sdram clock gate */
+    writel(0x01000000,0x01C202C0);
+    writel(0x01004000,0x01C202C0);
+    writel(0x00010501,0x01C20AC4);
+    writel(0xB7CEEDC2,0x01c01004);
+    writel(0x00A70008,0x01c01008);
+    writel(0x0001318A,0x01C01000);
+    writel(0x000800c8,0x01C0100C);
+    writel(0x000800c9,0x01C0100C);
+    writel(0x00161600,0x01C01024);
+    writel(0x000004C0,0x01C01010);
+}

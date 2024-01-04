@@ -1,37 +1,69 @@
+#include "uart.h"
+#include "string.h"
+
+#define CCU_BASE    0x01c20000
+#define CLK_GATE2   0x68
+#define RST_GATE2   0x2d0
+
 #define PIO_BASE	0x01c20800
-#define PA_CFG0		0x00
+#define PE_CFG0     0x90
 
-#define PA_DATA		0x10
+#define UART0_BASE  0x01c25000
 
-void delay(volatile unsigned int n)
+#define readl(a) (*(volatile unsigned int *)(a))
+#define writel(v,a) (*(volatile unsigned int *)(a) = (v))
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+
+extern void ddr_init(void);
+
+static char g_char = 'A';
+
+static void wait_pll_stable(u32 base)
 {
-	while(n--);
+	u32 rval = 0;
+	u32 time = 0xfff;
+
+	do {
+		rval = readl(&base);
+		time--;
+	} while(time && !(rval & (1 << 28)));
+}
+
+static void clk_init(void)
+{
+    u32 val;
+
+    /* enable pll_cpu and set to 408MHz */
+    val = readl(CCU_BASE);
+    val &= ~((0x3 << 16) | (0x1f << 8) | (0x3 << 4) | (0x3 << 0));
+    val |= (1U << 31) | (0 << 16) | (0x10 << 8) | (0 << 4) | 0;
+    writel(val, CCU_BASE);
+    wait_pll_stable(CCU_BASE);
+
+    /* set cpu clk source to pll_cpu */
+    val = readl(CCU_BASE + 0x50);
+    writel((0x2 << 16), CCU_BASE + 0x50);
 }
 
 int main(int argc, char **argv)
 {
-	volatile unsigned int *rp;
+    // char str[] = "Relocate Demo Test.\r\n";
+    // ddr_init();
+    clk_init();
+    uart_init();
 
-	/* configure PA3 to GPIO Output mode */
-	rp = (volatile unsigned int *)(PIO_BASE + PA_CFG0);
-	*rp &= ~(7 << 12);
-	*rp |= (1 << 12);
+    /* uart function test */
+    uart_putc('A');
+    uart_putc('B');
+    uart_putc('C');
+    uart_putc('\r');
+    uart_putc('\n');
 
-	rp = (volatile unsigned int *)(PIO_BASE + PA_DATA);
+    // puthex(&g_char);
+    put_s_hex("g_char's addr = ", &g_char);
 
-	while(1){
-		/* set PA3 to low */
-		*rp &= ~(1 << 3);
-
-		/* delay */
-		delay(0x0000f000);
-
-		/* set PA3 to high */
-		*rp |= (1 << 3);
-
-		/* delay */
-		delay(0x0000f000);
-	}
-
-	return 0;
+    return 0;
 }

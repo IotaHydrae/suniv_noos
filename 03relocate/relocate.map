@@ -1,0 +1,107 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+.sram            0x0000000000000000 0x000000000000a000
+.sdram           0x0000000080000000 0x0000000000400000
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+
+.text           0x0000000080000000      0x6f0
+                0x0000000080000000                _start = .
+ *(.text)
+ .text          0x0000000080000000       0x50 head.o
+ .text          0x0000000080000050      0x11c ddr.o
+                0x0000000080000050                ddr_init
+ .text          0x000000008000016c      0x154 main.o
+                0x0000000080000250                main
+ .text          0x00000000800002c0      0x210 uart.o
+                0x00000000800002c0                uart_init
+                0x0000000080000428                uart_putc
+                0x0000000080000478                uart_puts
+ .text          0x00000000800004d0      0x220 string.o
+                0x00000000800004d0                puts
+                0x00000000800004fc                puthex
+                0x00000000800005c4                put_s_hex
+                0x0000000080000608                memcpy
+                0x0000000080000688                memset
+
+.glue_7         0x00000000800006f0        0x0
+ .glue_7        0x00000000800006f0        0x0 linker stubs
+
+.glue_7t        0x00000000800006f0        0x0
+ .glue_7t       0x00000000800006f0        0x0 linker stubs
+
+.vfp11_veneer   0x00000000800006f0        0x0
+ .vfp11_veneer  0x00000000800006f0        0x0 linker stubs
+
+.v4_bx          0x00000000800006f0        0x0
+ .v4_bx         0x00000000800006f0        0x0 linker stubs
+
+.iplt           0x00000000800006f0        0x0
+ .iplt          0x00000000800006f0        0x0 head.o
+                0x00000000800006f0                . = ALIGN (0x4)
+
+.rodata         0x00000000800006f0       0x11
+                0x00000000800006f0                __rodata_start = .
+ *(.rodata)
+ .rodata        0x00000000800006f0       0x11 main.o
+
+.rel.dyn        0x0000000080000704        0x0
+ .rel.iplt      0x0000000080000704        0x0 head.o
+                0x0000000080000704                . = ALIGN (0x4)
+
+.data           0x0000000080000701        0x1
+ *(.data)
+ .data          0x0000000080000701        0x0 head.o
+ .data          0x0000000080000701        0x0 ddr.o
+ .data          0x0000000080000701        0x1 main.o
+ .data          0x0000000080000702        0x0 uart.o
+ .data          0x0000000080000702        0x0 string.o
+
+.igot.plt       0x0000000080000704        0x0
+ .igot.plt      0x0000000080000704        0x0 head.o
+                0x0000000080000704                . = ALIGN (0x4)
+
+.bss            0x0000000080000702        0x0
+                0x0000000080000702                __bss_start = .
+ *(.bss)
+ .bss           0x0000000080000702        0x0 head.o
+ .bss           0x0000000080000702        0x0 ddr.o
+ .bss           0x0000000080000702        0x0 main.o
+ .bss           0x0000000080000702        0x0 uart.o
+ .bss           0x0000000080000702        0x0 string.o
+ *(.COMMON)
+                0x0000000080000702                __bss_end = .
+LOAD head.o
+LOAD ddr.o
+LOAD main.o
+LOAD uart.o
+LOAD string.o
+OUTPUT(relocate.elf elf32-littlearm)
+LOAD linker stubs
+
+.ARM.attributes
+                0x0000000000000000       0x26
+ .ARM.attributes
+                0x0000000000000000       0x1a head.o
+ .ARM.attributes
+                0x000000000000001a       0x2a ddr.o
+ .ARM.attributes
+                0x0000000000000044       0x2a main.o
+ .ARM.attributes
+                0x000000000000006e       0x2a uart.o
+ .ARM.attributes
+                0x0000000000000098       0x2a string.o
+
+.comment        0x0000000000000000       0x33
+ .comment       0x0000000000000000       0x33 ddr.o
+                                         0x34 (size before relaxing)
+ .comment       0x0000000000000033       0x34 main.o
+ .comment       0x0000000000000033       0x34 uart.o
+ .comment       0x0000000000000033       0x34 string.o
+Memory region         Used Size  Region Size  %age Used
+           .sram:          0 GB        40 KB      0.00%
+          .sdram:        1794 B         4 MB      0.04%

@@ -1,4 +1,4 @@
-MEMORY { .sram : ORIGIN = 0x00010000, LENGTH = 0x000A000 }
+MEMORY { .sram : ORIGIN = 0x00000000, LENGTH = 0x000A000 }
 MEMORY { .sdram : ORIGIN = 0x80000000, LENGTH = 0x00400000 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -7,17 +7,20 @@ ENTRY(_start)
 SECTIONS {
 	.text      :
 	{
-		__start = .;
+		_start = .;
 		*(.text)
-	} > .sram
+	} > .sdram
 
 	. = ALIGN(4);
-	.rodata : { *(.rodata) } > .sram
+	.rodata : {
+		__rodata_start = .;
+		*(.rodata)
+	} > .sdram
 
 	. = ALIGN(4);
-	.data : { 
+	.data : {
 		*(.data)
-	 } > .sram
+	 } > .sdram
 
 	. = ALIGN(4);
 	.bss :

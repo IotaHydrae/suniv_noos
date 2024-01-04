@@ -6,30 +6,35 @@
 # Hi, guys
 # 
 # If you want to run this program from spi flash or sd,
-# you need to burn led.img to flash or sd like:
-# `sudo sunxi-fel -p spi-flash write 0 led.img`
+# you need to burn $(TARGET).img to flash or sd like:
+# `sudo sunxi-fel -p spi-flash write 0 $(TARGET).img`
+# and reset SoC to exectue it, the priority of `sdio` is
+# higher than `spi`, for more about priority of boot,
+# take a look at https://linux-sunxi.org/
 #
-# The `led.img` is just led.bin but add a "sunxi eGon" head,
-# and is checked by bootrom.
+# The `$(TARGET).img` is just $(TARGET).bin but add a "sunxi eGon" head,
+# and it's checked by bootrom.
 #
-# If you want to run program to sram, just 
-# download the led.bin to 0x00000000
+# If you want to run program from sram,
+# just download the $(TARGET).bin to 0x00000000
+# `sudo sunxi-fel write 0x0 $(TARGET).bin && sudo sunxi-fel exec 0x0`,
+# or just `make exec`
 #
 # PS:
-# I don't know why the address of sram coincides with bootrom, 
+# I don't know why the address of sram coincides with bootrom,
 # according to the manual, the address of SRAM A should be 0x00010000.
 #
 # My guess is this:
-# The overlapped sram at 0x00000000, It's just looks overlapped. 
+# The overlapped sram at 0x00000000, It's just looks overlapped.
 #
-# In fact, It's like this. When the cpu is powered on to 
+# In fact, It's like this. When the cpu is powered on to
 # execute the bootrom, if no executable firmware is detected
-# from the spi and sdio, the SoC will enter the FEL mode, 
-# so the bootrom has no effect. Now, the memory controller switches 
-# the first address of SRAM A to 0x00000000. When we write the bin 
+# from the spi and sdio, the SoC will enter the FEL mode,
+# so the bootrom has no effect. Now, the memory controller switches
+# the first address of SRAM A to 0x00000000. When we write the bin
 # file to the address of 0x00000000, it is actually written to SRAM A.
 #
-# Of course, there is another possibility, there is indeed another sram, 
+# Of course, there is another possibility, there is indeed another sram,
 # which replaces the location of the bootrom, but we don't know it.
 #
 # Cheers, Iota
@@ -39,45 +44,46 @@ PREFIX?=arm-none-eabi-
 CC:=$(PREFIX)gcc
 LD:=$(PREFIX)ld
 AR:=$(PREFIX)ar
+SIZE:=$(PREFIX)size
 OBJCOPY:=$(PREFIX)objcopy
 OBJDUMP:=$(PREFIX)objdump
-
-CFLAGS:=-nostdlib -Wall -g
 
 LOAD_ADDR:=0x00000000
 LINK_ADDR:=0x80000000
 
 LINK_SCRIPT:=suniv-f1c200s.lds
-#LINK_SCRIPT:=suniv.lds
 
-objs:=head.o dram_suniv.o clock_suniv.o
+TARGET:=relocate
 
-default:led.bin
+objs:=head.o ddr.o main.o uart.o string.o
 
-led.bin: clean $(objs)
-	$(LD) -T $(LINK_SCRIPT) -g $(objs) -o led.elf
+default:$(TARGET).bin
 
-	$(OBJCOPY) -O binary -S led.elf led.bin
-	$(OBJDUMP) -D -m arm led.elf > led.dis
+$(TARGET).bin: clean $(objs)
+	$(LD) --print-memory-usage -T $(LINK_SCRIPT) -g $(objs) -o $(TARGET).elf -M > $(TARGET).map
 
-led.img: led.bin
-	mkimage -C none -A arm -T sunxi_egon -e $(LINK_ADDR) -d led.bin $@
+	$(OBJCOPY) -O binary -S $(TARGET).elf $(TARGET).bin
+	$(OBJDUMP) -D -m arm $(TARGET).elf > $(TARGET).dis
+	$(SIZE) $(TARGET).elf
+
+$(TARGET).img: $(TARGET).bin
+	mkimage -C none -A arm -T sunxi_egon -e $(LINK_ADDR) -d $(TARGET).bin $@
 
 %.o:%.S
-	$(CC) -nostdlib -g -c -o $@ $<
+	$(CC) -nostdlib -fno-builtin -c -o $@ $<
 %.o:%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) -nostdlib -fno-builtin -c -o $@ $<
 
 .PHONY:clean
 clean:
-	rm -rf *.img *.dis *.elf *.o *.bin
+	rm -rf *.img *.dis *.elf *.o *.bin *.map
 
 .PHONY:write
-write:led.bin
+write:$(TARGET).bin
 	sudo sunxi-fel -p write $(LOAD_ADDR) $<
 
 .PHONY:write-flash
-write-flash:led.img
+write-flash:$(TARGET).img
 	sudo sunxi-fel -p spiflash-write 0 $
 
 .PHONY:exec
